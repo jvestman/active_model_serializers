@@ -31,7 +31,8 @@ module ActiveModel
     end
 
     def serializer_for(item)
-      serializer_class = @each_serializer || Serializer.serializer_for(item) || DefaultSerializer
+      #serializer_class = @each_serializer || Serializer.serializer_for(item) || DefaultSerializer
+      serializer_class = Serializer.serializer_for(item) || DefaultSerializer
       serializer_class.new(item, @options)
     end
 
@@ -44,7 +45,9 @@ module ActiveModel
 
     def embedded_in_root_associations
       @object.each_with_object({}) do |item, hash|
-        hash.merge!(serializer_for(item).embedded_in_root_associations)
+        hash.merge!(serializer_for(item).embedded_in_root_associations) do |key, oldval, newval|
+          (newval.is_a?(Array) ? (oldval + newval) : (oldval << newval)).uniq
+        end
       end
     end
   end
